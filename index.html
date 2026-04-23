@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Journal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "MS Sans Serif", Tahoma, sans-serif;
+            background: #c0c0c0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Window */
+        .window {
+            width: 100%;
+            height: 100%;
+            background: #c0c0c0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Menu Bar */
+        .menu {
+            background: #c0c0c0;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-bottom: 1px solid #808080;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .menu-item {
+            color: #0000AA;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+
+        .menu-item:hover {
+            background-color: #000080;
+            color: #FFFFFF;
+        }
+
+        .menu-divider {
+            color: #808080;
+        }
+
+        /* Content Area */
+        .content {
+            background: #ffffff;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Sidebar - Navigation */
+        .sidebar {
+            width: 280px;
+            background: #f0f0f0;
+            border: 1px solid #c0c0c0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-shrink: 0;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid #c0c0c0;
+            padding-bottom: 10px;
+        }
+
+        .sidebar-title {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: #000080;
+        }
+
+        .year-list, .month-list {
+            list-style: none;
+        }
+
+        .year-item, .month-item {
+            padding: 4px 6px;
+            cursor: pointer;
+            font-size: 11px;
+            border-radius: 2px;
+        }
+
+        .year-item:hover, .month-item:hover {
+            background: #000080;
+            color: white;
+        }
+
+        .year-item.active, .month-item.active {
+            background: #000080;
+            color: white;
+        }
+
+        /* Search Box */
+        .search-box {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 4px;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            border: 1px solid #808080;
+        }
+
+        /* Entries Container */
+        .entries-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Entry Card */
+        .entry-card {
+            background: #fffffa;
+            border: 1px solid #c0c0c0;
+            padding: 15px;
+            position: relative;
+            transition: box-shadow 0.1s ease;
+        }
+
+        .entry-card:hover {
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .entry-date {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .entry-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000080;
+        }
+
+        .entry-mood {
+            font-size: 20px;
+        }
+
+        .entry-content {
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .entry-image {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: 1px solid #c0c0c0;
+        }
+
+        /* Stickers inside entries */
+        .entry-stickers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .entry-sticker {
+            font-size: 24px;
+            cursor: move;
+            position: relative;
+            display: inline-block;
+        }
+
+        .entry-sticker .remove-sticker {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 14px;
+            height: 14px;
+            background: #c0c0c0;
+            border: 1px solid #000;
+            border-radius: 10px;
+            font-size: 9px;
+            text-align: center;
+            line-height: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .entry-sticker:hover .remove-sticker {
+            display: block;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* Edit Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #000;
+            border-bottom-color: #000;
+            width: 550px;
+            max-width: 90%;
+            max-height: 85%;
+            overflow: auto;
+        }
+
+        .modal-title-bar {
+            background: #000080;
+            color: white;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .modal-body {
+            padding: 15px;
+        }
+
+        .modal-body input, .modal-body textarea, .modal-body select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 5px;
+            font-family: inherit;
+            border: 1px solid #808080;
+        }
+
+        .modal-body textarea {
+            resize: vertical;
+        }
+
+        .retro-button {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #000;
+            border-bottom-color: #000;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            margin-top: 5px;
+        }
+
+        .retro-button:active {
+            border: 2px solid #000;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        /* Sticker Selector */
+        .sticker-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .sticker-option {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 5px;
+            border: 1px solid #c0c0c0;
+        }
+
+        .sticker-option:hover {
+            background: #e0e0e0;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 3px solid #c0c0c0;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Progress Bar */
+        .status-bar {
+            padding: 4px 8px;
+            background: #c0c0c0;
+            border-top: 1px solid #808080;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            .entries-container {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="window">
+    <div class="menu">
+        <span class="menu-item" id="newEntryBtn">📝 New Entry</span>
+        <span class="menu-divider">|</span>
+        <span class="menu-item" id="exportAllBtn">💾 Export All</span>
+        <span class="menu-divider">|</span>
+        <span class="menu-item" id="helpBtn">❓ Help</span>
+    </div>
+
+    <div class="content">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔍 Search</div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Keyword...">
+                    <input type="date" id="searchDate" style="width: 120px;">
+                    <button id="searchBtn" class="retro-button" style="padding: 2px 6px;">Go</button>
+                    <button id="clearSearchBtn" class="retro-button" style="padding: 2px 6px;">Clear</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📅 By Year</div>
+                <div class="year-list" id="yearList"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📆 By Month</div>
+                <div class="month-list" id="monthList"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📊 Stats</div>
+                <div style="font-size: 11px;">
+                    Total Entries: <span id="totalEntries">0</span><br>
+                    This Month: <span id="monthEntries">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entries List -->
+        <div class="entries-container" id="entriesContainer"></div>
+    </div>
+
+    <div class="status-bar">
+        <span>📔 Journal</span>
+        <span id="entryCount">0 entries</span>
+    </div>
+</div>
+
+<!-- New/Edit Entry Modal -->
+<div class="modal" id="entryModal">
+    <div class="modal-content" id="modalContent">
+        <div class="modal-title-bar" id="modalTitleBar">
+            <span id="modalTitle">New Entry</span>
+            <span style="cursor:pointer" id="closeModal">✗</span>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="entryTitle" placeholder="Title" autocomplete="off">
+            <input type="date" id="entryDate">
+            <select id="entryMood">
+                <option value="😊">😊 Happy</option>
+                <option value="😐">😐 Neutral</option>
+                <option value="😢">😢 Sad</option>
+                <option value="❤️">❤️ Loved</option>
+                <option value="🌟">🌟 Grateful</option>
+                <option value="🤔">🤔 Reflective</option>
+            </select>
+            <textarea id="entryContent" placeholder="Write your thoughts here..." rows="8"></textarea>
+            <input type="text" id="entryImage" placeholder="Image URL (optional)">
+            
+            <div class="sidebar-title">✨ Stickers</div>
+            <div class="sticker-palette" id="stickerPalette"></div>
+            <div id="selectedStickers" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
+            
+            <button id="saveEntryBtn" class="retro-button">Save Entry</button>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal" id="helpModal">
+    <div class="modal-content">
+        <div class="modal-title-bar">
+            Help
+            <span style="cursor:pointer" id="closeHelpModal">✗</span>
+        </div>
+        <div class="modal-body">
+            <p><strong>📝 New Entry</strong> - Create a journal entry</p>
+            <p><strong>🔍 Search</strong> - Filter by keyword or date</p>
+            <p><strong>📅 Navigation</strong> - Click years/months to filter</p>
+            <p><strong>✏️ Edit</strong> - Click Edit on any entry</p>
+            <p><strong>🗑️ Delete</strong> - Click Delete on any entry</p>
+            <p><strong>✨ Stickers</strong> - Add stickers to entries, drag to reposition</p>
+            <p><strong>🖼️ Images</strong> - Click images to enlarge</p>
+            <p><strong>💾 Export</strong> - Save all entries as a backup file</p>
+            <button id="closeHelpBtn" class="retro-button">Got it</button>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="">
+</div>
+
+<script>
+    // ========== DATA ==========
+    let journalEntries = [];
+    let currentFilter = { keyword: '', date: '', year: null, month: null };
+    let editingEntryId = null;
+    let currentStickers = [];
+
+    // Available stickers
+    const availableStickers = ['🌟', '✨', '❤️', '💭', '🌸', '🕯️', '📖', '🧸', '🎵', '☕', '🌈', '🍂', '⭐', '🌙', '🎈', '💖', '🦋', '🌿', '🍀', '🐱'];
+
+    // ========== LOAD/SAVE ==========
+    function loadEntries() {
+        const saved = localStorage.getItem('journal_entries');
+        if (saved) {
+            journalEntries = JSON.parse(saved);
+        } else {
+            // Sample entries
+            const today = new Date().toISOString().split('T')[0];
+            journalEntries = [
+                { id: Date.now(), title: "First Entry", date: today, mood: "😊", content: "Welcome to your journal! This is where you can write your thoughts, memories, and feelings.", image: "", stickers: [] },
+                { id: Date.now()+1, title: "Another Day", date: today, mood: "🌟", content: "Write about what made you grateful today.", image: "", stickers: [] }
+            ];
+        }
+        renderFilters();
+        renderEntries();
+    }
+
+    function saveEntries() {
+        localStorage.setItem('journal_entries', JSON.stringify(journalEntries));
+        renderFilters();
+        renderEntries();
+    }
+
+    // ========== RENDER FUNCTIONS ==========
+    function renderFilters() {
+        // Get unique years from entries
+        const years = [...new Set(journalEntries.map(e => e.date.substring(0, 4)))].sort().reverse();
+        const yearContainer = document.getElementById('yearList');
+        yearContainer.innerHTML = years.map(year => 
+            `<div class="year-item ${currentFilter.year === year ? 'active' : ''}" data-year="${year}">📁 ${year}</div>`
+        ).join('');
+
+        document.querySelectorAll('.year-item').forEach(el => {
+            el.addEventListener('click', () => {
+                currentFilter.year = el.dataset.year;
+                currentFilter.month = null;
+                applyFilter();
+            });
+        });
+
+        // Get months for selected year
+        if (currentFilter.year) {
+            const monthsInYear = [...new Set(journalEntries
+                .filter(e => e.date.startsWith(currentFilter.year))
+                .map(e => e.date.substring(5, 7)))].sort();
+            const monthNames = ['01-Jan', '02-Feb', '03-Mar', '04-Apr', '05-May', '06-Jun', '07-Jul', '08-Aug', '09-Sep', '10-Oct', '11-Nov', '12-Dec'];
+            const monthContainer = document.getElementById('monthList');
+            monthContainer.innerHTML = monthsInYear.map(m => 
+                `<div class="month-item ${currentFilter.month === m ? 'active' : ''}" data-month="${m}">📆 ${monthNames[parseInt(m)-1]}</div>`
+            ).join('');
+            
+            document.querySelectorAll('.month-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    currentFilter.month = el.dataset.month;
+                    applyFilter();
+                });
+            });
+        } else {
+            document.getElementById('monthList').innerHTML = '<div style="font-size:11px; color:#999;">Select a year first</div>';
+        }
+
+        // Update stats
+        const total = journalEntries.length;
+        const currentMonth = new Date().toISOString().split('T')[0].substring(0, 7);
+        const monthCount = journalEntries.filter(e => e.date.startsWith(currentMonth)).length;
+        document.getElementById('totalEntries').innerText = total;
+        document.getElementById('monthEntries').innerText = monthCount;
+        document.getElementById('entryCount').innerText = `${total} entries`;
+    }
+
+    function renderEntries() {
+        const container = document.getElementById('entriesContainer');
+        let filtered = [...journalEntries];
+
+        // Apply keyword search
+        if (currentFilter.keyword) {
+            const kw = currentFilter.keyword.toLowerCase();
+            filtered = filtered.filter(e => 
+                e.title.toLowerCase().includes(kw) || 
+                e.content.toLowerCase().includes(kw)
+            );
+        }
+
+        // Apply date search
+        if (currentFilter.date) {
+            filtered = filtered.filter(e => e.date === currentFilter.date);
+        }
+
+        // Apply year filter
+        if (currentFilter.year) {
+            filtered = filtered.filter(e => e.date.startsWith(currentFilter.year));
+        }
+
+        // Apply month filter
+        if (currentFilter.month) {
+            filtered = filtered.filter(e => e.date.substring(5, 7) === currentFilter.month);
+        }
+
+        // Sort by date descending
+        filtered.sort((a, b) => b.date.localeCompare(a.date));
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">📔 No entries found. Click "New Entry" to start writing.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(entry => `
+            <div class="entry-card" data-id="${entry.id}">
+                <div class="entry-header">
+                    <div>
+                        <div class="entry-date">📅 ${formatDate(entry.date)}</div>
+                        <div class="entry-title">${escapeHtml(entry.title) || 'Untitled'}</div>
+                    </div>
+                    <div class="entry-mood">${entry.mood || '😊'}</div>
+                </div>
+                <div class="entry-content">${escapeHtml(entry.content.substring(0, 300))}${entry.content.length > 300 ? '...' : ''}</div>
+                ${entry.image ? `<img src="${getImagePath(entry.image)}" class="entry-image" data-src="${getImagePath(entry.image)}">` : ''}
+                <div class="entry-stickers" data-entry-id="${entry.id}">
+                    ${(entry.stickers || []).map((sticker, idx) => `
+                        <div class="entry-sticker" data-sticker-idx="${idx}" style="cursor: grab;">
+                            ${sticker}
+                            <div class="remove-sticker" data-sticker="${sticker}">✗</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="entry-actions">
+                    <button class="retro-button edit-entry" data-id="${entry.id}" style="padding: 2px 8px;">✏️ Edit</button>
+                    <button class="retro-button delete-entry" data-id="${entry.id}" style="padding: 2px 8px;">🗑️ Delete</button>
+                    <button class="retro-button add-sticker-btn" data-id="${entry.id}" style="padding: 2px 8px;">✨ Add Sticker</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Attach event listeners
+        document.querySelectorAll('.edit-entry').forEach(btn => {
+            btn.addEventListener('click', () => editEntry(parseInt(btn.dataset.id)));
+        });
+        document.querySelectorAll('.delete-entry').forEach(btn => {
+            btn.addEventListener('click', () => deleteEntry(parseInt(btn.dataset.id)));
+        });
+        document.querySelectorAll('.add-sticker-btn').forEach(btn => {
+            btn.addEventListener('click', () => addStickerToEntry(parseInt(btn.dataset.id)));
+        });
+        document.querySelectorAll('.entry-image').forEach(img => {
+            img.addEventListener('click', () => openLightbox(img.dataset.src));
+        });
+        
+        // Make stickers draggable
+        makeStickersDraggable();
+    }
+
+    function makeStickersDraggable() {
+        document.querySelectorAll('.entry-sticker').forEach(sticker => {
+            sticker.setAttribute('draggable', 'true');
+            sticker.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', sticker.innerHTML);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            sticker.addEventListener('dragend', (e) => {
+                // Sticker repositioning would require more complex logic
+            });
+            sticker.querySelector('.remove-sticker')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const entryId = parseInt(sticker.closest('.entry-card').dataset.id);
+                const stickerText = sticker.childNodes[0].nodeValue || sticker.querySelector('.remove-sticker')?.previousSibling?.nodeValue;
+                removeStickerFromEntry(entryId, stickerText);
+            });
+        });
+    }
+
+    // ========== ENTRY FUNCTIONS ==========
+    function openNewEntryModal() {
+        editingEntryId = null;
+        document.getElementById('modalTitle').innerText = 'New Entry';
+        document.getElementById('entryTitle').value = '';
+        document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('entryMood').value = '😊';
+        document.getElementById('entryContent').value = '';
+        document.getElementById('entryImage').value = '';
+        currentStickers = [];
+        renderStickerPalette();
+        renderSelectedStickers();
+        document.getElementById('entryModal').style.display = 'flex';
+    }
+
+    function editEntry(id) {
+        const entry = journalEntries.find(e => e.id === id);
+        if (!entry) return;
+        editingEntryId = id;
+        document.getElementById('modalTitle').innerText = 'Edit Entry';
+        document.getElementById('entryTitle').value = entry.title;
+        document.getElementById('entryDate').value = entry.date;
+        document.getElementById('entryMood').value = entry.mood || '😊';
+        document.getElementById('entryContent').value = entry.content;
+        document.getElementById('entryImage').value = entry.image || '';
+        currentStickers = [...(entry.stickers || [])];
+        renderStickerPalette();
+        renderSelectedStickers();
+        document.getElementById('entryModal').style.display = 'flex';
+    }
+
+    function deleteEntry(id) {
+        if (confirm('Delete this entry forever?')) {
+            journalEntries = journalEntries.filter(e => e.id !== id);
+            saveEntries();
+        }
+    }
+
+    function saveEntry() {
+        const title = document.getElementById('entryTitle').value.trim();
+        const date = document.getElementById('entryDate').value;
+        const mood = document.getElementById('entryMood').value;
+        const content = document.getElementById('entryContent').value.trim();
+        const image = document.getElementById('entryImage').value.trim();
+
+        if (!date) {
+            alert('Please select a date');
+            return;
+        }
+        if (!content && !title) {
+            alert('Please write something in your entry');
+            return;
+        }
+
+        if (editingEntryId) {
+            const index = journalEntries.findIndex(e => e.id === editingEntryId);
+            if (index !== -1) {
+                journalEntries[index].title = title;
+                journalEntries[index].date = date;
+                journalEntries[index].mood = mood;
+                journalEntries[index].content = content;
+                journalEntries[index].image = image;
+                journalEntries[index].stickers = [...currentStickers];
+            }
+        } else {
+            journalEntries.push({
+                id: Date.now(),
+                title: title,
+                date: date,
+                mood: mood,
+                content: content,
+                image: image,
+                stickers: [...currentStickers]
+            });
+        }
+        saveEntries();
+        document.getElementById('entryModal').style.display = 'none';
+    }
+
+    function addStickerToEntry(entryId) {
+        const entry = journalEntries.find(e => e.id === entryId);
+        if (!entry) return;
+        
+        const sticker = prompt('Enter emoji sticker (e.g., 🌟, ❤️, 🌸):', '🌟');
+        if (sticker && sticker.trim()) {
+            if (!entry.stickers) entry.stickers = [];
+            entry.stickers.push(sticker);
+            saveEntries();
+        }
+    }
+
+    function removeStickerFromEntry(entryId, stickerText) {
+        const entry = journalEntries.find(e => e.id === entryId);
+        if (entry && entry.stickers) {
+            const index = entry.stickers.indexOf(stickerText);
+            if (index !== -1) entry.stickers.splice(index, 1);
+            saveEntries();
+        }
+    }
+
+    // ========== STICKER PALETTE ==========
+    function renderStickerPalette() {
+        const palette = document.getElementById('stickerPalette');
+        palette.innerHTML = availableStickers.map(s => 
+            `<div class="sticker-option" data-sticker="${s}">${s}</div>`
+        ).join('');
+        
+        document.querySelectorAll('.sticker-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                currentStickers.push(opt.dataset.sticker);
+                renderSelectedStickers();
+            });
+        });
+    }
+
+    function renderSelectedStickers() {
+        const container = document.getElementById('selectedStickers');
+        container.innerHTML = currentStickers.map((s, idx) => 
+            `<div style="position:relative; font-size:28px; padding:5px; border:1px solid #ccc;">
+                ${s}
+                <span style="position:absolute; top:-5px; right:-5px; width:14px; height:14px; background:#c0c0c0; border:1px solid #000; border-radius:10px; font-size:9px; text-align:center; line-height:12px; cursor:pointer;" data-idx="${idx}">✗</span>
+            </div>`
+        ).join('');
+        
+        document.querySelectorAll('#selectedStickers span').forEach(span => {
+            span.addEventListener('click', (e) => {
+                const idx = parseInt(span.dataset.idx);
+                currentStickers.splice(idx, 1);
+                renderSelectedStickers();
+            });
+        });
+    }
+
+    // ========== SEARCH & FILTER ==========
+    function applyFilter() {
+        renderEntries();
+        renderFilters();
+    }
+
+    function clearSearch() {
+        currentFilter = { keyword: '', date: '', year: null, month: null };
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchDate').value = '';
+        renderEntries();
+        renderFilters();
+    }
+
+    // ========== EXPORT ==========
+    function exportAll() {
+        const dataStr = JSON.stringify(journalEntries, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `journal-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('Journal exported successfully!');
+    }
+
+    // ========== HELPERS ==========
+    function formatDate(dateStr) {
+        const [year, month, day] = dateStr.split('-');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${monthNames[parseInt(month)-1]} ${parseInt(day)}, ${year}`;
+    }
+
+    function getImagePath(path) {
+        if (!path) return '';
+        if (path.startsWith('http') || path.startsWith('data:')) return path;
+        if (!path.startsWith('images/')) return 'images/' + path;
+        return path;
+    }
+
+    function openLightbox(src) {
+        const lightbox = document.getElementById('lightbox');
+        const img = document.getElementById('lightboxImg');
+        img.src = src;
+        lightbox.style.display = 'flex';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, (m) => {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ========== DRAG MODAL ==========
+    function makeDraggable(popupId, handleId) {
+        const popup = document.getElementById(popupId);
+        const handle = document.getElementById(handleId);
+        if (!popup || !handle) return;
+        
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        handle.onmousedown = dragMouseDown;
+        
+        function dragMouseDown(e) {
+            if (e.target.classList.contains('buttons')) return;
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDrag;
+            document.onmousemove = elementDrag;
+        }
+        
+        function elementDrag(e) {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            popup.style.top = (popup.offsetTop - pos2) + 'px';
+            popup.style.left = (popup.offsetLeft - pos1) + 'px';
+            popup.style.transform = 'none';
+        }
+        
+        function closeDrag() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    // ========== INITIALIZE ==========
+    document.getElementById('newEntryBtn').onclick = openNewEntryModal;
+    document.getElementById('exportAllBtn').onclick = exportAll;
+    document.getElementById('helpBtn').onclick = () => document.getElementById('helpModal').style.display = 'flex';
+    document.getElementById('closeHelpModal').onclick = () => document.getElementById('helpModal').style.display = 'none';
+    document.getElementById('closeHelpBtn').onclick = () => document.getElementById('helpModal').style.display = 'none';
+    document.getElementById('closeModal').onclick = () => document.getElementById('entryModal').style.display = 'none';
+    document.getElementById('saveEntryBtn').onclick = saveEntry;
+    document.getElementById('searchBtn').onclick = () => {
+        currentFilter.keyword = document.getElementById('searchInput').value;
+        currentFilter.date = document.getElementById('searchDate').value;
+        currentFilter.year = null;
+        currentFilter.month = null;
+        applyFilter();
+    };
+    document.getElementById('clearSearchBtn').onclick = clearSearch;
+    document.getElementById('lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
+    
+    makeDraggable('entryModal', 'modalTitleBar');
+    makeDraggable('helpModal', 'closeHelpModal');
+
+    loadEntries();
+</script>
+</body>
+</html>
