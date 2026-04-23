@@ -388,10 +388,6 @@
             color: white;
         }
 
-        .add-image-btn {
-            margin-top: 5px;
-        }
-
         .retro-button {
             background: #c0c0c0;
             border: 2px solid #fff;
@@ -461,6 +457,16 @@
             display: flex;
             justify-content: space-between;
             flex-shrink: 0;
+        }
+
+        .image-tip {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: #ffffcc;
+            border: 1px solid #c0c0c0;
         }
 
         @media (max-width: 768px) {
@@ -565,33 +571,18 @@
             </select>
             <textarea id="entryContent" placeholder="Write your thoughts here..." rows="8"></textarea>
             
-            <div class="sidebar-title">🖼️ Photos (multiple)</div>
-            <div class="images-list-container" id="imagesListContainer"></div>
-            <div style="display: flex; gap: 8px;">
-                <button id="addImageBtn" class="retro-button add-image-btn">➕ Add Image URL</button>
-                <button id="browseImagesBtn" class="retro-button add-image-btn">📁 Browse Images Folder</button>
+            <div class="sidebar-title">🖼️ Photos</div>
+            <div class="image-tip">
+                💡 <strong>Tip:</strong> Put images in your <strong>images/</strong> folder, then type: <strong>images/photo.jpg</strong>
             </div>
+            <div class="images-list-container" id="imagesListContainer"></div>
+            <button id="addImageBtn" class="retro-button add-image-btn">➕ Add Image</button>
             
             <div class="sidebar-title">✨ Stickers</div>
             <div class="sticker-palette" id="stickerPalette"></div>
             <div id="selectedStickers" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
             
             <button id="saveEntryBtn" class="retro-button">Save Entry</button>
-        </div>
-    </div>
-</div>
-
-<!-- Image Browser Modal -->
-<div class="modal" id="imageBrowserModal">
-    <div class="modal-content">
-        <div class="modal-title-bar">
-            <span>📁 Select Image</span>
-            <span style="cursor:pointer" id="closeImageBrowser">✗</span>
-        </div>
-        <div class="modal-body" id="imageBrowserBody">
-            <p style="margin-bottom:10px;">Images from your <strong>images/</strong> folder:</p>
-            <div id="imageList" style="display: flex; flex-wrap: wrap; gap: 10px; max-height: 300px; overflow-y: auto;"></div>
-            <p style="margin-top:10px; font-size:11px; color:#666;">💡 Tip: Put images in your "images/" folder on GitHub</p>
         </div>
     </div>
 </div>
@@ -607,10 +598,10 @@
             <p><strong>📝 New Entry</strong> - Create a journal entry</p>
             <p><strong>👁️ View Entry</strong> - Click any entry card to read it</p>
             <p><strong>✏️ Edit Entry</strong> - Click Edit button on any entry</p>
-            <p><strong>🖼️ Multiple Photos</strong> - Add several photos to one entry</p>
+            <p><strong>🖼️ Photos</strong> - Type image path like <strong>images/photo.jpg</strong> after uploading to your images folder</p>
             <p><strong>🔍 Search</strong> - Filter by keyword or date</p>
             <p><strong>📅 Navigation</strong> - Click years/months in sidebar</p>
-            <p><strong>✨ Stickers</strong> - Add emoji stickers to decorate entries</p>
+            <p><strong>✨ Stickers</strong> - Click stickers to add them</p>
             <p><strong>💾 Export</strong> - Save all entries as backup file</p>
             <button id="closeHelpBtn" class="retro-button">Got it</button>
         </div>
@@ -638,8 +629,7 @@
         } else {
             const today = new Date().toISOString().split('T')[0];
             journalEntries = [
-                { id: Date.now(), title: "Welcome to Your Journal", date: today, mood: "🌟", content: "This is your personal journal. Click 'New Entry' to start writing your memories, thoughts, and feelings. You can add multiple photos, stickers, and browse by year/month.", images: [], stickers: [] },
-                { id: Date.now()+1, title: "A Sentimental Day", date: today, mood: "❤️", content: "Today I felt grateful for all the little things. The morning sunlight, a warm cup of tea, and the comfort of familiar places.", images: [], stickers: ['🌸', '☕'] }
+                { id: Date.now(), title: "Welcome to Your Journal", date: today, mood: "🌟", content: "This is your personal journal. Click 'New Entry' to start writing. You can add photos by typing their path (like images/photo.jpg) after uploading them to your images folder.", images: [], stickers: [] }
             ];
         }
         renderFilters();
@@ -804,7 +794,6 @@
         });
     }
 
-    // Image management
     function renderImagesList() {
         const container = document.getElementById('imagesListContainer');
         if (!container) return;
@@ -817,7 +806,7 @@
         container.innerHTML = currentImages.map((img, idx) => `
             <div class="image-item">
                 <img src="${getImagePath(img)}" data-src="${getImagePath(img)}" class="preview-thumb">
-                <input type="text" value="${escapeHtml(img)}" data-idx="${idx}" class="image-path-input">
+                <input type="text" value="${escapeHtml(img)}" data-idx="${idx}" class="image-path-input" style="width: 60%;">
                 <button class="remove-image-btn" data-idx="${idx}">✗ Remove</button>
             </div>
         `).join('');
@@ -844,51 +833,11 @@
     }
 
     function addImageUrl() {
-        const url = prompt('Enter image path or URL:', 'images/photo.jpg');
+        const url = prompt('Enter image path (e.g., images/photo.jpg):', 'images/');
         if (url && url.trim()) {
             currentImages.push(url.trim());
             renderImagesList();
         }
-    }
-
-    function openImageBrowser() {
-        const sampleImages = [
-            { name: '🌸 flower.jpg', path: 'images/flower.jpg' },
-            { name: '🌅 sunset.jpg', path: 'images/sunset.jpg' },
-            { name: '🌲 forest.jpg', path: 'images/forest.jpg' },
-            { name: '🏔️ mountain.jpg', path: 'images/mountain.jpg' },
-            { name: '🌊 ocean.jpg', path: 'images/ocean.jpg' },
-            { name: '📖 book.jpg', path: 'images/book.jpg' },
-            { name: '☕ coffee.jpg', path: 'images/coffee.jpg' }
-        ];
-        
-        const imageList = document.getElementById('imageList');
-        imageList.innerHTML = sampleImages.map(img => `
-            <div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="${img.path}">
-                <div style="font-size: 40px;">${img.name.charAt(0)}</div>
-                <div style="font-size: 10px;">${img.name}</div>
-            </div>
-        `).join('');
-        
-        imageList.innerHTML += `<div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="url">
-            <div style="font-size: 40px;">🔗</div>
-            <div style="font-size: 10px;">Use URL</div>
-        </div>`;
-        
-        document.querySelectorAll('#imageList > div').forEach(div => {
-            div.addEventListener('click', () => {
-                if (div.dataset.path === 'url') {
-                    const url = prompt('Enter image URL:', 'https://example.com/photo.jpg');
-                    if (url) currentImages.push(url);
-                } else {
-                    currentImages.push(div.dataset.path);
-                }
-                renderImagesList();
-                document.getElementById('imageBrowserModal').style.display = 'none';
-            });
-        });
-        
-        document.getElementById('imageBrowserModal').style.display = 'flex';
     }
 
     function openNewEntryModal() {
@@ -1109,13 +1058,10 @@
     document.getElementById('clearSearchBtn').onclick = clearSearch;
     document.getElementById('lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
     document.getElementById('addImageBtn').onclick = addImageUrl;
-    document.getElementById('browseImagesBtn').onclick = openImageBrowser;
-    document.getElementById('closeImageBrowser').onclick = () => document.getElementById('imageBrowserModal').style.display = 'none';
     
     makeDraggable('entryModal', 'modalTitleBar');
     makeDraggable('helpModal', 'closeHelpModal');
     makeDraggable('viewModal', 'viewTitleBar');
-    makeDraggable('imageBrowserModal', 'closeImageBrowser');
 
     loadEntries();
 </script>
