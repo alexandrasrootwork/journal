@@ -1,129 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Test</title>
-    <style>
-        body {
-            font-family: "MS Sans Serif", Tahoma, sans-serif;
-            background: #008080;
-            padding: 20px;
-            color: white;
-        }
-        .test-box {
-            background: #c0c0c0;
-            border: 2px solid #fff;
-            padding: 20px;
-            margin: 20px 0;
-            color: black;
-        }
-        img {
-            max-width: 300px;
-            border: 2px solid #000;
-            margin: 10px;
-        }
-        input {
-            width: 300px;
-            padding: 5px;
-            font-family: monospace;
-        }
-        button {
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .error {
-            color: #ff0000;
-            background: #ffffcc;
-            padding: 10px;
-        }
-    </style>
+    <title>Image Test on GitHub</title>
 </head>
 <body>
-
-<h1>🖼️ Image Path Tester</h1>
-
-<div class="test-box">
-    <h3>Step 1: Enter Image Path</h3>
-    <input type="text" id="imagePath" placeholder="images/flower.jpg" value="images/flower.jpg">
-    <button id="loadBtn">Load Image</button>
-    <button id="testCatBtn">Test with known working image</button>
-</div>
-
-<div class="test-box">
-    <h3>Result:</h3>
+    <h1>Testing Images on GitHub</h1>
+    
+    <h3>Test 1: Direct GitHub URL</h3>
+    <img src="images/flower.jpg" alt="Local image" style="max-width: 300px; border: 1px solid black;">
+    <p>↑ If this doesn't show, your image path is wrong or file doesn't exist</p>
+    
+    <h3>Test 2: Your actual image filename</h3>
+    <p>Type your exact filename here: <input type="text" id="filename" placeholder="e.g., my-photo.jpg"></p>
+    <button onclick="testImage()">Test Image</button>
     <div id="result"></div>
-</div>
-
-<div class="test-box">
-    <h3>💡 Tips:</h3>
-    <ul>
-        <li>Your images folder should be at: <strong>same folder as this HTML file → images/</strong></li>
-        <li>Example folder structure:<br>
-            📁 your-website-folder/<br>
-            &nbsp;&nbsp;&nbsp;📄 test-image.html<br>
-            &nbsp;&nbsp;&nbsp;📄 bucketlist.html<br>
-            &nbsp;&nbsp;&nbsp;📁 images/<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📷 flower.jpg<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📷 sunset.jpg
-        </li>
-        <li>Try using a known working image URL: <strong>https://picsum.photos/200/150</strong></li>
-    </ul>
-</div>
-
-<script>
-    const imagePath = document.getElementById('imagePath');
-    const loadBtn = document.getElementById('loadBtn');
-    const testCatBtn = document.getElementById('testCatBtn');
-    const resultDiv = document.getElementById('result');
     
-    function testImage(path) {
-        resultDiv.innerHTML = '<p>⏳ Loading image...</p>';
-        
-        const img = new Image();
-        const fullPath = path.startsWith('http') ? path : path;
-        
-        img.onload = function() {
-            resultDiv.innerHTML = `
-                <p style="color: #008000;">✅ SUCCESS! Image loaded!</p>
-                <p>Path used: <strong>${path}</strong></p>
-                <img src="${fullPath}">
-                <p>Image size: ${img.width} x ${img.height} pixels</p>
-            `;
-        };
-        
-        img.onerror = function() {
-            resultDiv.innerHTML = `
-                <div class="error">
-                    <p>❌ FAILED! Could not load image.</p>
-                    <p><strong>Path tried:</strong> ${path}</p>
-                    <p><strong>Full URL:</strong> ${window.location.href.substring(0, window.location.href.lastIndexOf('/'))}/${path}</p>
-                </div>
-                <div style="background: #ffffcc; padding: 10px; margin-top: 10px;">
-                    <strong>📁 What to check:</strong><br>
-                    1. Does the folder "images" exist?<br>
-                    2. Does the file "${path.replace('images/', '')}" exist inside it?<br>
-                    3. Is the filename spelled EXACTLY (including capital letters)?<br>
-                    4. Try using a full URL like https://picsum.photos/200/150 to test<br>
-                    5. Try converting your HEIC image to JPG first
-                </div>
-            `;
-        };
-        
-        img.src = fullPath;
-    }
+    <h3>Test 3: Check what files are in your images folder</h3>
+    <p>Go to: <strong>https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/tree/main/images</strong></p>
+    <p>Replace YOUR_USERNAME and YOUR_REPO_NAME with your actual GitHub info</p>
     
-    loadBtn.addEventListener('click', () => {
-        const path = imagePath.value.trim();
-        if (path) testImage(path);
-        else alert('Enter a path first');
-    });
-    
-    testCatBtn.addEventListener('click', () => {
-        testImage('https://picsum.photos/400/300?random=1');
-    });
-    
-    // Test default
-    testImage('images/flower.jpg');
-</script>
-
+    <script>
+        function testImage() {
+            const filename = document.getElementById('filename').value;
+            const resultDiv = document.getElementById('result');
+            if (!filename) {
+                resultDiv.innerHTML = '<p>Please enter a filename</p>';
+                return;
+            }
+            const img = new Image();
+            img.onload = function() {
+                resultDiv.innerHTML = '<p style="color:green;">✅ Image found! Path: images/' + filename + '</p><img src="images/' + filename + '" style="max-width:300px;">';
+            };
+            img.onerror = function() {
+                resultDiv.innerHTML = '<p style="color:red;">❌ Image NOT found. Check:<br>- Exact spelling (including .jpg vs .JPG)<br>- File is actually in the images/ folder<br>- Go to your GitHub repo to see what files are there</p>';
+            };
+            img.src = 'images/' + filename;
+        }
+    </script>
 </body>
 </html>
