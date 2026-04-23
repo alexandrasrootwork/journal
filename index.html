@@ -19,7 +19,6 @@
             overflow: hidden;
         }
 
-        /* Main Window */
         .window {
             width: 100%;
             height: 100%;
@@ -29,7 +28,6 @@
             overflow: hidden;
         }
 
-        /* Menu Bar */
         .menu {
             background: #c0c0c0;
             padding: 4px 8px;
@@ -57,7 +55,6 @@
             color: #808080;
         }
 
-        /* Content Area */
         .content {
             background: #ffffff;
             flex-grow: 1;
@@ -67,7 +64,6 @@
             gap: 20px;
         }
 
-        /* Sidebar - Navigation */
         .sidebar {
             width: 280px;
             background: #f0f0f0;
@@ -113,7 +109,6 @@
             color: white;
         }
 
-        /* Search Box */
         .search-box {
             display: flex;
             gap: 5px;
@@ -127,7 +122,6 @@
             border: 1px solid #808080;
         }
 
-        /* Entries Container */
         .entries-container {
             flex: 1;
             display: flex;
@@ -135,7 +129,6 @@
             gap: 15px;
         }
 
-        /* Entry Card */
         .entry-card {
             background: #fffffa;
             border: 1px solid #c0c0c0;
@@ -183,12 +176,19 @@
             word-break: break-word;
         }
 
-        .entry-image-preview {
-            max-width: 100%;
-            max-height: 100px;
+        .entry-images-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
             margin-top: 8px;
+        }
+
+        .entry-image-preview {
+            max-width: 80px;
+            max-height: 80px;
             cursor: pointer;
             border: 1px solid #c0c0c0;
+            object-fit: cover;
         }
 
         .entry-stickers {
@@ -208,7 +208,7 @@
             margin-top: 10px;
         }
 
-        /* View Modal (Read-only) */
+        /* View Modal */
         .view-modal {
             display: none;
             position: fixed;
@@ -227,7 +227,7 @@
             border: 2px solid #fff;
             border-right-color: #000;
             border-bottom-color: #000;
-            width: 550px;
+            width: 600px;
             max-width: 90%;
             max-height: 85%;
             overflow: auto;
@@ -273,12 +273,19 @@
             word-break: break-word;
         }
 
+        .view-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
         .view-image {
-            max-width: 100%;
-            max-height: 300px;
-            margin: 10px 0;
+            max-width: 200px;
+            max-height: 200px;
             cursor: pointer;
             border: 1px solid #c0c0c0;
+            object-fit: cover;
         }
 
         .view-stickers {
@@ -308,7 +315,7 @@
             border: 2px solid #fff;
             border-right-color: #000;
             border-bottom-color: #000;
-            width: 550px;
+            width: 600px;
             max-width: 90%;
             max-height: 85%;
             overflow: auto;
@@ -339,19 +346,50 @@
             resize: vertical;
         }
 
-        .image-input-group {
-            display: flex;
-            gap: 8px;
+        .images-list-container {
+            border: 1px solid #808080;
+            background: #fff;
+            padding: 10px;
             margin-bottom: 10px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        .image-input-group input {
+        .image-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .image-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .image-item input {
             flex: 1;
             margin-bottom: 0;
         }
 
-        .image-input-group button {
-            white-space: nowrap;
+        .remove-image-btn {
+            background: #c0c0c0;
+            border: 1px solid #000;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 11px;
+        }
+
+        .remove-image-btn:hover {
+            background: #ff0000;
+            color: white;
+        }
+
+        .add-image-btn {
+            margin-top: 5px;
         }
 
         .retro-button {
@@ -371,7 +409,6 @@
             border-bottom-color: #fff;
         }
 
-        /* Sticker Selector */
         .sticker-palette {
             display: flex;
             flex-wrap: wrap;
@@ -390,7 +427,6 @@
             background: #e0e0e0;
         }
 
-        /* Lightbox */
         .lightbox {
             display: none;
             position: fixed;
@@ -411,14 +447,12 @@
             border: 3px solid #c0c0c0;
         }
 
-        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #999;
         }
 
-        /* Status Bar */
         .status-bar {
             padding: 4px 8px;
             background: #c0c0c0;
@@ -440,6 +474,10 @@
             .entries-container {
                 order: 1;
             }
+            .view-image {
+                max-width: 100px;
+                max-height: 100px;
+            }
         }
     </style>
 </head>
@@ -455,7 +493,6 @@
     </div>
 
     <div class="content">
-        <!-- Sidebar Navigation -->
         <div class="sidebar">
             <div class="sidebar-section">
                 <div class="sidebar-title">🔍 Search</div>
@@ -486,7 +523,6 @@
             </div>
         </div>
 
-        <!-- Entries List -->
         <div class="entries-container" id="entriesContainer"></div>
     </div>
 
@@ -496,20 +532,18 @@
     </div>
 </div>
 
-<!-- View Entry Modal (Read-only) -->
+<!-- View Modal -->
 <div class="view-modal" id="viewModal">
     <div class="view-modal-content">
         <div class="view-title-bar" id="viewTitleBar">
             <span>📖 Read Entry</span>
             <span style="cursor:pointer" id="closeViewModal">✗</span>
         </div>
-        <div class="view-body" id="viewBody">
-            <!-- Content loaded dynamically -->
-        </div>
+        <div class="view-body" id="viewBody"></div>
     </div>
 </div>
 
-<!-- Edit Entry Modal -->
+<!-- Edit Modal -->
 <div class="modal" id="entryModal">
     <div class="modal-content" id="modalContent">
         <div class="modal-title-bar" id="modalTitleBar">
@@ -531,10 +565,11 @@
             </select>
             <textarea id="entryContent" placeholder="Write your thoughts here..." rows="8"></textarea>
             
-            <div class="sidebar-title">🖼️ Photo</div>
-            <div class="image-input-group">
-                <input type="text" id="entryImage" placeholder="images/photo.jpg or https://...">
-                <button id="browseImagesBtn" class="retro-button" style="margin-top:0;">📁 Browse</button>
+            <div class="sidebar-title">🖼️ Photos (multiple)</div>
+            <div class="images-list-container" id="imagesListContainer"></div>
+            <div style="display: flex; gap: 8px;">
+                <button id="addImageBtn" class="retro-button add-image-btn">➕ Add Image URL</button>
+                <button id="browseImagesBtn" class="retro-button add-image-btn">📁 Browse Images Folder</button>
             </div>
             
             <div class="sidebar-title">✨ Stickers</div>
@@ -572,9 +607,9 @@
             <p><strong>📝 New Entry</strong> - Create a journal entry</p>
             <p><strong>👁️ View Entry</strong> - Click any entry card to read it</p>
             <p><strong>✏️ Edit Entry</strong> - Click Edit button on any entry</p>
+            <p><strong>🖼️ Multiple Photos</strong> - Add several photos to one entry</p>
             <p><strong>🔍 Search</strong> - Filter by keyword or date</p>
             <p><strong>📅 Navigation</strong> - Click years/months in sidebar</p>
-            <p><strong>🖼️ Images</strong> - Use URL or click Browse to pick from your images folder</p>
             <p><strong>✨ Stickers</strong> - Add emoji stickers to decorate entries</p>
             <p><strong>💾 Export</strong> - Save all entries as backup file</p>
             <button id="closeHelpBtn" class="retro-button">Got it</button>
@@ -588,28 +623,14 @@
 </div>
 
 <script>
-    // ========== DATA ==========
     let journalEntries = [];
     let currentFilter = { keyword: '', date: '', year: null, month: null };
     let editingEntryId = null;
     let currentStickers = [];
+    let currentImages = [];
 
-    // Available stickers
     const availableStickers = ['🌟', '✨', '❤️', '💭', '🌸', '🕯️', '📖', '🧸', '🎵', '☕', '🌈', '🍂', '⭐', '🌙', '🎈', '💖', '🦋', '🌿', '🍀', '🐱', '☀️', '❄️', '🍁'];
 
-    // Hardcoded images in your images folder (you can add more)
-    const availableImages = [
-        '📷 No image selected',
-        '🌸 flower.jpg',
-        '🌅 sunset.jpg',
-        '🌲 forest.jpg',
-        '🏔️ mountain.jpg',
-        '🌊 ocean.jpg',
-        '📖 book.jpg',
-        '☕ coffee.jpg'
-    ];
-
-    // ========== LOAD/SAVE ==========
     function loadEntries() {
         const saved = localStorage.getItem('journal_entries');
         if (saved) {
@@ -617,8 +638,8 @@
         } else {
             const today = new Date().toISOString().split('T')[0];
             journalEntries = [
-                { id: Date.now(), title: "Welcome to Your Journal", date: today, mood: "🌟", content: "This is your personal journal. Click 'New Entry' to start writing your memories, thoughts, and feelings. You can add photos, stickers, and browse by year/month.", image: "", stickers: [] },
-                { id: Date.now()+1, title: "A Sentimental Day", date: today, mood: "❤️", content: "Today I felt grateful for all the little things. The morning sunlight, a warm cup of tea, and the comfort of familiar places.", image: "", stickers: ['🌸', '☕'] }
+                { id: Date.now(), title: "Welcome to Your Journal", date: today, mood: "🌟", content: "This is your personal journal. Click 'New Entry' to start writing your memories, thoughts, and feelings. You can add multiple photos, stickers, and browse by year/month.", images: [], stickers: [] },
+                { id: Date.now()+1, title: "A Sentimental Day", date: today, mood: "❤️", content: "Today I felt grateful for all the little things. The morning sunlight, a warm cup of tea, and the comfort of familiar places.", images: [], stickers: ['🌸', '☕'] }
             ];
         }
         renderFilters();
@@ -631,7 +652,6 @@
         renderEntries();
     }
 
-    // ========== RENDER FUNCTIONS ==========
     function renderFilters() {
         const years = [...new Set(journalEntries.map(e => e.date.substring(0, 4)))].sort().reverse();
         const yearContainer = document.getElementById('yearList');
@@ -713,7 +733,12 @@
                     <div class="entry-mood">${entry.mood || '😊'}</div>
                 </div>
                 <div class="entry-content-preview">${escapeHtml(entry.content.substring(0, 200))}${entry.content.length > 200 ? '...' : ''}</div>
-                ${entry.image ? `<img src="${getImagePath(entry.image)}" class="entry-image-preview" data-src="${getImagePath(entry.image)}">` : ''}
+                ${entry.images && entry.images.length > 0 ? `
+                    <div class="entry-images-preview">
+                        ${entry.images.slice(0, 3).map(img => `<img src="${getImagePath(img)}" class="entry-image-preview" data-src="${getImagePath(img)}">`).join('')}
+                        ${entry.images.length > 3 ? `<span style="font-size:11px; color:#666;">+${entry.images.length - 3} more</span>` : ''}
+                    </div>
+                ` : ''}
                 <div class="entry-stickers">
                     ${(entry.stickers || []).map(sticker => `<div class="entry-sticker">${sticker}</div>`).join('')}
                 </div>
@@ -724,7 +749,6 @@
             </div>
         `).join('');
 
-        // View on card click
         document.querySelectorAll('.entry-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.classList.contains('retro-button') || e.target.closest('.retro-button')) return;
@@ -763,7 +787,11 @@
             <div class="view-title">${escapeHtml(entry.title) || 'Untitled'}</div>
             <div class="view-mood">${entry.mood || '😊'}</div>
             <div class="view-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
-            ${entry.image ? `<img src="${getImagePath(entry.image)}" class="view-image" data-src="${getImagePath(entry.image)}">` : ''}
+            ${entry.images && entry.images.length > 0 ? `
+                <div class="view-images">
+                    ${entry.images.map(img => `<img src="${getImagePath(img)}" class="view-image" data-src="${getImagePath(img)}">`).join('')}
+                </div>
+            ` : ''}
             <div class="view-stickers">
                 ${(entry.stickers || []).map(sticker => `<div>${sticker}</div>`).join('')}
             </div>
@@ -776,7 +804,93 @@
         });
     }
 
-    // ========== ENTRY FUNCTIONS ==========
+    // Image management
+    function renderImagesList() {
+        const container = document.getElementById('imagesListContainer');
+        if (!container) return;
+        
+        if (currentImages.length === 0) {
+            container.innerHTML = '<div style="color:#999; text-align:center; padding:20px;">No images added yet. Click "Add Image" to add photos.</div>';
+            return;
+        }
+        
+        container.innerHTML = currentImages.map((img, idx) => `
+            <div class="image-item">
+                <img src="${getImagePath(img)}" data-src="${getImagePath(img)}" class="preview-thumb">
+                <input type="text" value="${escapeHtml(img)}" data-idx="${idx}" class="image-path-input">
+                <button class="remove-image-btn" data-idx="${idx}">✗ Remove</button>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.image-item .preview-thumb').forEach(thumb => {
+            thumb.addEventListener('click', () => openLightbox(thumb.dataset.src));
+        });
+        
+        document.querySelectorAll('.image-path-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const idx = parseInt(input.dataset.idx);
+                currentImages[idx] = input.value;
+                renderImagesList();
+            });
+        });
+        
+        document.querySelectorAll('.remove-image-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                currentImages.splice(idx, 1);
+                renderImagesList();
+            });
+        });
+    }
+
+    function addImageUrl() {
+        const url = prompt('Enter image path or URL:', 'images/photo.jpg');
+        if (url && url.trim()) {
+            currentImages.push(url.trim());
+            renderImagesList();
+        }
+    }
+
+    function openImageBrowser() {
+        const sampleImages = [
+            { name: '🌸 flower.jpg', path: 'images/flower.jpg' },
+            { name: '🌅 sunset.jpg', path: 'images/sunset.jpg' },
+            { name: '🌲 forest.jpg', path: 'images/forest.jpg' },
+            { name: '🏔️ mountain.jpg', path: 'images/mountain.jpg' },
+            { name: '🌊 ocean.jpg', path: 'images/ocean.jpg' },
+            { name: '📖 book.jpg', path: 'images/book.jpg' },
+            { name: '☕ coffee.jpg', path: 'images/coffee.jpg' }
+        ];
+        
+        const imageList = document.getElementById('imageList');
+        imageList.innerHTML = sampleImages.map(img => `
+            <div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="${img.path}">
+                <div style="font-size: 40px;">${img.name.charAt(0)}</div>
+                <div style="font-size: 10px;">${img.name}</div>
+            </div>
+        `).join('');
+        
+        imageList.innerHTML += `<div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="url">
+            <div style="font-size: 40px;">🔗</div>
+            <div style="font-size: 10px;">Use URL</div>
+        </div>`;
+        
+        document.querySelectorAll('#imageList > div').forEach(div => {
+            div.addEventListener('click', () => {
+                if (div.dataset.path === 'url') {
+                    const url = prompt('Enter image URL:', 'https://example.com/photo.jpg');
+                    if (url) currentImages.push(url);
+                } else {
+                    currentImages.push(div.dataset.path);
+                }
+                renderImagesList();
+                document.getElementById('imageBrowserModal').style.display = 'none';
+            });
+        });
+        
+        document.getElementById('imageBrowserModal').style.display = 'flex';
+    }
+
     function openNewEntryModal() {
         editingEntryId = null;
         document.getElementById('modalTitle').innerText = 'New Entry';
@@ -784,8 +898,9 @@
         document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('entryMood').value = '😊';
         document.getElementById('entryContent').value = '';
-        document.getElementById('entryImage').value = '';
+        currentImages = [];
         currentStickers = [];
+        renderImagesList();
         renderStickerPalette();
         renderSelectedStickers();
         document.getElementById('entryModal').style.display = 'flex';
@@ -800,8 +915,9 @@
         document.getElementById('entryDate').value = entry.date;
         document.getElementById('entryMood').value = entry.mood || '😊';
         document.getElementById('entryContent').value = entry.content;
-        document.getElementById('entryImage').value = entry.image || '';
+        currentImages = [...(entry.images || [])];
         currentStickers = [...(entry.stickers || [])];
+        renderImagesList();
         renderStickerPalette();
         renderSelectedStickers();
         document.getElementById('entryModal').style.display = 'flex';
@@ -819,7 +935,6 @@
         const date = document.getElementById('entryDate').value;
         const mood = document.getElementById('entryMood').value;
         const content = document.getElementById('entryContent').value.trim();
-        const image = document.getElementById('entryImage').value.trim();
 
         if (!date) {
             alert('Please select a date');
@@ -837,7 +952,7 @@
                 journalEntries[index].date = date;
                 journalEntries[index].mood = mood;
                 journalEntries[index].content = content;
-                journalEntries[index].image = image;
+                journalEntries[index].images = [...currentImages];
                 journalEntries[index].stickers = [...currentStickers];
             }
         } else {
@@ -847,7 +962,7 @@
                 date: date,
                 mood: mood,
                 content: content,
-                image: image,
+                images: [...currentImages],
                 stickers: [...currentStickers]
             });
         }
@@ -855,7 +970,6 @@
         document.getElementById('entryModal').style.display = 'none';
     }
 
-    // ========== STICKER FUNCTIONS ==========
     function renderStickerPalette() {
         const palette = document.getElementById('stickerPalette');
         palette.innerHTML = availableStickers.map(s => 
@@ -888,49 +1002,6 @@
         });
     }
 
-    // ========== IMAGE BROWSER ==========
-    function openImageBrowser() {
-        const imageList = document.getElementById('imageList');
-        // You can customize these to match your actual images folder
-        const sampleImages = [
-            { name: '🌸 flower.jpg', path: 'images/flower.jpg' },
-            { name: '🌅 sunset.jpg', path: 'images/sunset.jpg' },
-            { name: '🌲 forest.jpg', path: 'images/forest.jpg' },
-            { name: '🏔️ mountain.jpg', path: 'images/mountain.jpg' },
-            { name: '🌊 ocean.jpg', path: 'images/ocean.jpg' },
-            { name: '📖 book.jpg', path: 'images/book.jpg' },
-            { name: '☕ coffee.jpg', path: 'images/coffee.jpg' },
-            { name: '🌟 starry night.jpg', path: 'images/starry-night.jpg' }
-        ];
-        
-        imageList.innerHTML = sampleImages.map(img => `
-            <div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="${img.path}">
-                <div style="font-size: 40px;">${img.name.charAt(0)}</div>
-                <div style="font-size: 10px;">${img.name}</div>
-            </div>
-        `).join('');
-        
-        imageList.innerHTML += `<div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="url">
-            <div style="font-size: 40px;">🔗</div>
-            <div style="font-size: 10px;">Use URL</div>
-        </div>`;
-        
-        document.querySelectorAll('#imageList > div').forEach(div => {
-            div.addEventListener('click', () => {
-                if (div.dataset.path === 'url') {
-                    const url = prompt('Enter image URL:', 'https://example.com/photo.jpg');
-                    if (url) document.getElementById('entryImage').value = url;
-                } else {
-                    document.getElementById('entryImage').value = div.dataset.path;
-                }
-                document.getElementById('imageBrowserModal').style.display = 'none';
-            });
-        });
-        
-        document.getElementById('imageBrowserModal').style.display = 'flex';
-    }
-
-    // ========== SEARCH & FILTER ==========
     function applyFilter() {
         renderEntries();
         renderFilters();
@@ -944,7 +1015,6 @@
         renderFilters();
     }
 
-    // ========== EXPORT ==========
     function exportAll() {
         const dataStr = JSON.stringify(journalEntries, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -957,7 +1027,6 @@
         alert('Journal exported successfully!');
     }
 
-    // ========== HELPERS ==========
     function formatDate(dateStr) {
         const [year, month, day] = dateStr.split('-');
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -967,7 +1036,7 @@
     function getImagePath(path) {
         if (!path) return '';
         if (path.startsWith('http') || path.startsWith('data:')) return path;
-        if (!path.startsWith('images/')) return 'images/' + path;
+        if (!path.startsWith('images/') && !path.startsWith('http')) return 'images/' + path;
         return path;
     }
 
@@ -988,7 +1057,6 @@
         });
     }
 
-    // ========== DRAG MODAL ==========
     function makeDraggable(popupId, handleId) {
         const popup = document.getElementById(popupId);
         const handle = document.getElementById(handleId);
@@ -1023,7 +1091,6 @@
         }
     }
 
-    // ========== INITIALIZE ==========
     document.getElementById('newEntryBtn').onclick = openNewEntryModal;
     document.getElementById('exportAllBtn').onclick = exportAll;
     document.getElementById('helpBtn').onclick = () => document.getElementById('helpModal').style.display = 'flex';
@@ -1041,6 +1108,7 @@
     };
     document.getElementById('clearSearchBtn').onclick = clearSearch;
     document.getElementById('lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
+    document.getElementById('addImageBtn').onclick = addImageUrl;
     document.getElementById('browseImagesBtn').onclick = openImageBrowser;
     document.getElementById('closeImageBrowser').onclick = () => document.getElementById('imageBrowserModal').style.display = 'none';
     
