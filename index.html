@@ -142,10 +142,12 @@
             padding: 15px;
             position: relative;
             transition: box-shadow 0.1s ease;
+            cursor: pointer;
         }
 
         .entry-card:hover {
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            background: #fffff0;
         }
 
         .entry-header {
@@ -169,26 +171,26 @@
         }
 
         .entry-mood {
-            font-size: 20px;
+            font-size: 24px;
         }
 
-        .entry-content {
+        .entry-content-preview {
             font-size: 12px;
-            line-height: 1.5;
-            margin: 10px 0;
+            line-height: 1.4;
+            margin: 8px 0;
+            color: #444;
             white-space: pre-wrap;
             word-break: break-word;
         }
 
-        .entry-image {
+        .entry-image-preview {
             max-width: 100%;
-            max-height: 200px;
-            margin-top: 10px;
+            max-height: 100px;
+            margin-top: 8px;
             cursor: pointer;
             border: 1px solid #c0c0c0;
         }
 
-        /* Stickers inside entries */
         .entry-stickers {
             display: flex;
             flex-wrap: wrap;
@@ -198,35 +200,93 @@
 
         .entry-sticker {
             font-size: 24px;
-            cursor: move;
-            position: relative;
-            display: inline-block;
-        }
-
-        .entry-sticker .remove-sticker {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 14px;
-            height: 14px;
-            background: #c0c0c0;
-            border: 1px solid #000;
-            border-radius: 10px;
-            font-size: 9px;
-            text-align: center;
-            line-height: 12px;
-            cursor: pointer;
-            display: none;
-        }
-
-        .entry-sticker:hover .remove-sticker {
-            display: block;
         }
 
         .entry-actions {
             display: flex;
             gap: 8px;
             margin-top: 10px;
+        }
+
+        /* View Modal (Read-only) */
+        .view-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .view-modal-content {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #000;
+            border-bottom-color: #000;
+            width: 550px;
+            max-width: 90%;
+            max-height: 85%;
+            overflow: auto;
+        }
+
+        .view-title-bar {
+            background: #000080;
+            color: white;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .view-body {
+            padding: 15px;
+            background: #fffffa;
+        }
+
+        .view-date {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .view-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000080;
+            margin-bottom: 10px;
+        }
+
+        .view-mood {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .view-content {
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .view-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 10px 0;
+            cursor: pointer;
+            border: 1px solid #c0c0c0;
+        }
+
+        .view-stickers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 32px;
         }
 
         /* Edit Modal */
@@ -277,6 +337,21 @@
 
         .modal-body textarea {
             resize: vertical;
+        }
+
+        .image-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .image-input-group input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .image-input-group button {
+            white-space: nowrap;
         }
 
         .retro-button {
@@ -343,7 +418,7 @@
             color: #999;
         }
 
-        /* Progress Bar */
+        /* Status Bar */
         .status-bar {
             padding: 4px 8px;
             background: #c0c0c0;
@@ -421,7 +496,20 @@
     </div>
 </div>
 
-<!-- New/Edit Entry Modal -->
+<!-- View Entry Modal (Read-only) -->
+<div class="view-modal" id="viewModal">
+    <div class="view-modal-content">
+        <div class="view-title-bar" id="viewTitleBar">
+            <span>📖 Read Entry</span>
+            <span style="cursor:pointer" id="closeViewModal">✗</span>
+        </div>
+        <div class="view-body" id="viewBody">
+            <!-- Content loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Edit Entry Modal -->
 <div class="modal" id="entryModal">
     <div class="modal-content" id="modalContent">
         <div class="modal-title-bar" id="modalTitleBar">
@@ -438,15 +526,37 @@
                 <option value="❤️">❤️ Loved</option>
                 <option value="🌟">🌟 Grateful</option>
                 <option value="🤔">🤔 Reflective</option>
+                <option value="✨">✨ Inspired</option>
+                <option value="🌸">🌸 Peaceful</option>
             </select>
             <textarea id="entryContent" placeholder="Write your thoughts here..." rows="8"></textarea>
-            <input type="text" id="entryImage" placeholder="Image URL (optional)">
+            
+            <div class="sidebar-title">🖼️ Photo</div>
+            <div class="image-input-group">
+                <input type="text" id="entryImage" placeholder="images/photo.jpg or https://...">
+                <button id="browseImagesBtn" class="retro-button" style="margin-top:0;">📁 Browse</button>
+            </div>
             
             <div class="sidebar-title">✨ Stickers</div>
             <div class="sticker-palette" id="stickerPalette"></div>
             <div id="selectedStickers" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
             
             <button id="saveEntryBtn" class="retro-button">Save Entry</button>
+        </div>
+    </div>
+</div>
+
+<!-- Image Browser Modal -->
+<div class="modal" id="imageBrowserModal">
+    <div class="modal-content">
+        <div class="modal-title-bar">
+            <span>📁 Select Image</span>
+            <span style="cursor:pointer" id="closeImageBrowser">✗</span>
+        </div>
+        <div class="modal-body" id="imageBrowserBody">
+            <p style="margin-bottom:10px;">Images from your <strong>images/</strong> folder:</p>
+            <div id="imageList" style="display: flex; flex-wrap: wrap; gap: 10px; max-height: 300px; overflow-y: auto;"></div>
+            <p style="margin-top:10px; font-size:11px; color:#666;">💡 Tip: Put images in your "images/" folder on GitHub</p>
         </div>
     </div>
 </div>
@@ -460,13 +570,13 @@
         </div>
         <div class="modal-body">
             <p><strong>📝 New Entry</strong> - Create a journal entry</p>
+            <p><strong>👁️ View Entry</strong> - Click any entry card to read it</p>
+            <p><strong>✏️ Edit Entry</strong> - Click Edit button on any entry</p>
             <p><strong>🔍 Search</strong> - Filter by keyword or date</p>
-            <p><strong>📅 Navigation</strong> - Click years/months to filter</p>
-            <p><strong>✏️ Edit</strong> - Click Edit on any entry</p>
-            <p><strong>🗑️ Delete</strong> - Click Delete on any entry</p>
-            <p><strong>✨ Stickers</strong> - Add stickers to entries, drag to reposition</p>
-            <p><strong>🖼️ Images</strong> - Click images to enlarge</p>
-            <p><strong>💾 Export</strong> - Save all entries as a backup file</p>
+            <p><strong>📅 Navigation</strong> - Click years/months in sidebar</p>
+            <p><strong>🖼️ Images</strong> - Use URL or click Browse to pick from your images folder</p>
+            <p><strong>✨ Stickers</strong> - Add emoji stickers to decorate entries</p>
+            <p><strong>💾 Export</strong> - Save all entries as backup file</p>
             <button id="closeHelpBtn" class="retro-button">Got it</button>
         </div>
     </div>
@@ -485,7 +595,19 @@
     let currentStickers = [];
 
     // Available stickers
-    const availableStickers = ['🌟', '✨', '❤️', '💭', '🌸', '🕯️', '📖', '🧸', '🎵', '☕', '🌈', '🍂', '⭐', '🌙', '🎈', '💖', '🦋', '🌿', '🍀', '🐱'];
+    const availableStickers = ['🌟', '✨', '❤️', '💭', '🌸', '🕯️', '📖', '🧸', '🎵', '☕', '🌈', '🍂', '⭐', '🌙', '🎈', '💖', '🦋', '🌿', '🍀', '🐱', '☀️', '❄️', '🍁'];
+
+    // Hardcoded images in your images folder (you can add more)
+    const availableImages = [
+        '📷 No image selected',
+        '🌸 flower.jpg',
+        '🌅 sunset.jpg',
+        '🌲 forest.jpg',
+        '🏔️ mountain.jpg',
+        '🌊 ocean.jpg',
+        '📖 book.jpg',
+        '☕ coffee.jpg'
+    ];
 
     // ========== LOAD/SAVE ==========
     function loadEntries() {
@@ -493,11 +615,10 @@
         if (saved) {
             journalEntries = JSON.parse(saved);
         } else {
-            // Sample entries
             const today = new Date().toISOString().split('T')[0];
             journalEntries = [
-                { id: Date.now(), title: "First Entry", date: today, mood: "😊", content: "Welcome to your journal! This is where you can write your thoughts, memories, and feelings.", image: "", stickers: [] },
-                { id: Date.now()+1, title: "Another Day", date: today, mood: "🌟", content: "Write about what made you grateful today.", image: "", stickers: [] }
+                { id: Date.now(), title: "Welcome to Your Journal", date: today, mood: "🌟", content: "This is your personal journal. Click 'New Entry' to start writing your memories, thoughts, and feelings. You can add photos, stickers, and browse by year/month.", image: "", stickers: [] },
+                { id: Date.now()+1, title: "A Sentimental Day", date: today, mood: "❤️", content: "Today I felt grateful for all the little things. The morning sunlight, a warm cup of tea, and the comfort of familiar places.", image: "", stickers: ['🌸', '☕'] }
             ];
         }
         renderFilters();
@@ -512,7 +633,6 @@
 
     // ========== RENDER FUNCTIONS ==========
     function renderFilters() {
-        // Get unique years from entries
         const years = [...new Set(journalEntries.map(e => e.date.substring(0, 4)))].sort().reverse();
         const yearContainer = document.getElementById('yearList');
         yearContainer.innerHTML = years.map(year => 
@@ -527,12 +647,11 @@
             });
         });
 
-        // Get months for selected year
         if (currentFilter.year) {
             const monthsInYear = [...new Set(journalEntries
                 .filter(e => e.date.startsWith(currentFilter.year))
                 .map(e => e.date.substring(5, 7)))].sort();
-            const monthNames = ['01-Jan', '02-Feb', '03-Mar', '04-Apr', '05-May', '06-Jun', '07-Jul', '08-Aug', '09-Sep', '10-Oct', '11-Nov', '12-Dec'];
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             const monthContainer = document.getElementById('monthList');
             monthContainer.innerHTML = monthsInYear.map(m => 
                 `<div class="month-item ${currentFilter.month === m ? 'active' : ''}" data-month="${m}">📆 ${monthNames[parseInt(m)-1]}</div>`
@@ -548,7 +667,6 @@
             document.getElementById('monthList').innerHTML = '<div style="font-size:11px; color:#999;">Select a year first</div>';
         }
 
-        // Update stats
         const total = journalEntries.length;
         const currentMonth = new Date().toISOString().split('T')[0].substring(0, 7);
         const monthCount = journalEntries.filter(e => e.date.startsWith(currentMonth)).length;
@@ -561,7 +679,6 @@
         const container = document.getElementById('entriesContainer');
         let filtered = [...journalEntries];
 
-        // Apply keyword search
         if (currentFilter.keyword) {
             const kw = currentFilter.keyword.toLowerCase();
             filtered = filtered.filter(e => 
@@ -569,23 +686,16 @@
                 e.content.toLowerCase().includes(kw)
             );
         }
-
-        // Apply date search
         if (currentFilter.date) {
             filtered = filtered.filter(e => e.date === currentFilter.date);
         }
-
-        // Apply year filter
         if (currentFilter.year) {
             filtered = filtered.filter(e => e.date.startsWith(currentFilter.year));
         }
-
-        // Apply month filter
         if (currentFilter.month) {
             filtered = filtered.filter(e => e.date.substring(5, 7) === currentFilter.month);
         }
 
-        // Sort by date descending
         filtered.sort((a, b) => b.date.localeCompare(a.date));
 
         if (filtered.length === 0) {
@@ -602,58 +712,67 @@
                     </div>
                     <div class="entry-mood">${entry.mood || '😊'}</div>
                 </div>
-                <div class="entry-content">${escapeHtml(entry.content.substring(0, 300))}${entry.content.length > 300 ? '...' : ''}</div>
-                ${entry.image ? `<img src="${getImagePath(entry.image)}" class="entry-image" data-src="${getImagePath(entry.image)}">` : ''}
-                <div class="entry-stickers" data-entry-id="${entry.id}">
-                    ${(entry.stickers || []).map((sticker, idx) => `
-                        <div class="entry-sticker" data-sticker-idx="${idx}" style="cursor: grab;">
-                            ${sticker}
-                            <div class="remove-sticker" data-sticker="${sticker}">✗</div>
-                        </div>
-                    `).join('')}
+                <div class="entry-content-preview">${escapeHtml(entry.content.substring(0, 200))}${entry.content.length > 200 ? '...' : ''}</div>
+                ${entry.image ? `<img src="${getImagePath(entry.image)}" class="entry-image-preview" data-src="${getImagePath(entry.image)}">` : ''}
+                <div class="entry-stickers">
+                    ${(entry.stickers || []).map(sticker => `<div class="entry-sticker">${sticker}</div>`).join('')}
                 </div>
                 <div class="entry-actions">
                     <button class="retro-button edit-entry" data-id="${entry.id}" style="padding: 2px 8px;">✏️ Edit</button>
                     <button class="retro-button delete-entry" data-id="${entry.id}" style="padding: 2px 8px;">🗑️ Delete</button>
-                    <button class="retro-button add-sticker-btn" data-id="${entry.id}" style="padding: 2px 8px;">✨ Add Sticker</button>
                 </div>
             </div>
         `).join('');
 
-        // Attach event listeners
+        // View on card click
+        document.querySelectorAll('.entry-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('retro-button') || e.target.closest('.retro-button')) return;
+                const id = parseInt(card.dataset.id);
+                viewEntry(id);
+            });
+        });
+
         document.querySelectorAll('.edit-entry').forEach(btn => {
-            btn.addEventListener('click', () => editEntry(parseInt(btn.dataset.id)));
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                editEntry(parseInt(btn.dataset.id));
+            });
         });
         document.querySelectorAll('.delete-entry').forEach(btn => {
-            btn.addEventListener('click', () => deleteEntry(parseInt(btn.dataset.id)));
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteEntry(parseInt(btn.dataset.id));
+            });
         });
-        document.querySelectorAll('.add-sticker-btn').forEach(btn => {
-            btn.addEventListener('click', () => addStickerToEntry(parseInt(btn.dataset.id)));
+        document.querySelectorAll('.entry-image-preview').forEach(img => {
+            img.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openLightbox(img.dataset.src);
+            });
         });
-        document.querySelectorAll('.entry-image').forEach(img => {
-            img.addEventListener('click', () => openLightbox(img.dataset.src));
-        });
-        
-        // Make stickers draggable
-        makeStickersDraggable();
     }
 
-    function makeStickersDraggable() {
-        document.querySelectorAll('.entry-sticker').forEach(sticker => {
-            sticker.setAttribute('draggable', 'true');
-            sticker.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', sticker.innerHTML);
-                e.dataTransfer.effectAllowed = 'move';
-            });
-            sticker.addEventListener('dragend', (e) => {
-                // Sticker repositioning would require more complex logic
-            });
-            sticker.querySelector('.remove-sticker')?.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const entryId = parseInt(sticker.closest('.entry-card').dataset.id);
-                const stickerText = sticker.childNodes[0].nodeValue || sticker.querySelector('.remove-sticker')?.previousSibling?.nodeValue;
-                removeStickerFromEntry(entryId, stickerText);
-            });
+    function viewEntry(id) {
+        const entry = journalEntries.find(e => e.id === id);
+        if (!entry) return;
+        
+        const viewBody = document.getElementById('viewBody');
+        viewBody.innerHTML = `
+            <div class="view-date">📅 ${formatDate(entry.date)}</div>
+            <div class="view-title">${escapeHtml(entry.title) || 'Untitled'}</div>
+            <div class="view-mood">${entry.mood || '😊'}</div>
+            <div class="view-content">${escapeHtml(entry.content).replace(/\n/g, '<br>')}</div>
+            ${entry.image ? `<img src="${getImagePath(entry.image)}" class="view-image" data-src="${getImagePath(entry.image)}">` : ''}
+            <div class="view-stickers">
+                ${(entry.stickers || []).map(sticker => `<div>${sticker}</div>`).join('')}
+            </div>
+        `;
+        
+        document.getElementById('viewModal').style.display = 'flex';
+        
+        document.querySelectorAll('.view-image').forEach(img => {
+            img.addEventListener('click', () => openLightbox(img.dataset.src));
         });
     }
 
@@ -736,28 +855,7 @@
         document.getElementById('entryModal').style.display = 'none';
     }
 
-    function addStickerToEntry(entryId) {
-        const entry = journalEntries.find(e => e.id === entryId);
-        if (!entry) return;
-        
-        const sticker = prompt('Enter emoji sticker (e.g., 🌟, ❤️, 🌸):', '🌟');
-        if (sticker && sticker.trim()) {
-            if (!entry.stickers) entry.stickers = [];
-            entry.stickers.push(sticker);
-            saveEntries();
-        }
-    }
-
-    function removeStickerFromEntry(entryId, stickerText) {
-        const entry = journalEntries.find(e => e.id === entryId);
-        if (entry && entry.stickers) {
-            const index = entry.stickers.indexOf(stickerText);
-            if (index !== -1) entry.stickers.splice(index, 1);
-            saveEntries();
-        }
-    }
-
-    // ========== STICKER PALETTE ==========
+    // ========== STICKER FUNCTIONS ==========
     function renderStickerPalette() {
         const palette = document.getElementById('stickerPalette');
         palette.innerHTML = availableStickers.map(s => 
@@ -788,6 +886,48 @@
                 renderSelectedStickers();
             });
         });
+    }
+
+    // ========== IMAGE BROWSER ==========
+    function openImageBrowser() {
+        const imageList = document.getElementById('imageList');
+        // You can customize these to match your actual images folder
+        const sampleImages = [
+            { name: '🌸 flower.jpg', path: 'images/flower.jpg' },
+            { name: '🌅 sunset.jpg', path: 'images/sunset.jpg' },
+            { name: '🌲 forest.jpg', path: 'images/forest.jpg' },
+            { name: '🏔️ mountain.jpg', path: 'images/mountain.jpg' },
+            { name: '🌊 ocean.jpg', path: 'images/ocean.jpg' },
+            { name: '📖 book.jpg', path: 'images/book.jpg' },
+            { name: '☕ coffee.jpg', path: 'images/coffee.jpg' },
+            { name: '🌟 starry night.jpg', path: 'images/starry-night.jpg' }
+        ];
+        
+        imageList.innerHTML = sampleImages.map(img => `
+            <div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="${img.path}">
+                <div style="font-size: 40px;">${img.name.charAt(0)}</div>
+                <div style="font-size: 10px;">${img.name}</div>
+            </div>
+        `).join('');
+        
+        imageList.innerHTML += `<div style="width: 100px; text-align: center; cursor: pointer; padding: 5px; border: 1px solid #ccc;" data-path="url">
+            <div style="font-size: 40px;">🔗</div>
+            <div style="font-size: 10px;">Use URL</div>
+        </div>`;
+        
+        document.querySelectorAll('#imageList > div').forEach(div => {
+            div.addEventListener('click', () => {
+                if (div.dataset.path === 'url') {
+                    const url = prompt('Enter image URL:', 'https://example.com/photo.jpg');
+                    if (url) document.getElementById('entryImage').value = url;
+                } else {
+                    document.getElementById('entryImage').value = div.dataset.path;
+                }
+                document.getElementById('imageBrowserModal').style.display = 'none';
+            });
+        });
+        
+        document.getElementById('imageBrowserModal').style.display = 'flex';
     }
 
     // ========== SEARCH & FILTER ==========
@@ -890,6 +1030,7 @@
     document.getElementById('closeHelpModal').onclick = () => document.getElementById('helpModal').style.display = 'none';
     document.getElementById('closeHelpBtn').onclick = () => document.getElementById('helpModal').style.display = 'none';
     document.getElementById('closeModal').onclick = () => document.getElementById('entryModal').style.display = 'none';
+    document.getElementById('closeViewModal').onclick = () => document.getElementById('viewModal').style.display = 'none';
     document.getElementById('saveEntryBtn').onclick = saveEntry;
     document.getElementById('searchBtn').onclick = () => {
         currentFilter.keyword = document.getElementById('searchInput').value;
@@ -900,9 +1041,13 @@
     };
     document.getElementById('clearSearchBtn').onclick = clearSearch;
     document.getElementById('lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
+    document.getElementById('browseImagesBtn').onclick = openImageBrowser;
+    document.getElementById('closeImageBrowser').onclick = () => document.getElementById('imageBrowserModal').style.display = 'none';
     
     makeDraggable('entryModal', 'modalTitleBar');
     makeDraggable('helpModal', 'closeHelpModal');
+    makeDraggable('viewModal', 'viewTitleBar');
+    makeDraggable('imageBrowserModal', 'closeImageBrowser');
 
     loadEntries();
 </script>
